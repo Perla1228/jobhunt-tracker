@@ -1,0 +1,18 @@
+{
+  "name": "骑驴找马 · 进度追踪",
+  "short_name": "骑驴找马",
+  "description": "在职跳槽全过程的个人作战台：投递、面试、项目实践的进度追踪",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F3F2ED",
+  "theme_color": "#3D5A80",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
