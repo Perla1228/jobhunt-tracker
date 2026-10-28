@@ -1,4 +1,4 @@
-const CACHE = 'jobhunt-v3';
+const CACHE = 'jobhunt-v4';
 const ASSETS = ['./', './index.html', './styles.css', './app.js', './manifest.json', './icon.svg', './icon-180.png'];
 
 self.addEventListener('install', e=>{

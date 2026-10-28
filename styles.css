@@ -88,10 +88,6 @@ hr{border:none;border-top:1px solid var(--line-2);margin:12px 0}
   .tabbar button.active{color:var(--ink);font-weight:600}
   .tabbar button.active:before{content:"";display:block;width:22px;height:3px;background:var(--blue);
     border-radius:2px;margin:0 auto 4px}
-  .tabbar .tfab{width:48px;height:48px;border-radius:16px;background:var(--blue);color:#fff;
-    border:2px solid var(--ink);box-shadow:var(--sh-sm);
-    font-size:24px;line-height:44px;margin-top:-18px;flex:none;margin-left:6px;margin-right:6px}
-  .tabbar .tfab:active{transform:translate(2px,2px);box-shadow:none}
   .fab{display:block;position:fixed;right:16px;bottom:92px;width:52px;height:52px;border-radius:18px;
     background:var(--blue);color:#fff;border:2px solid var(--ink);box-shadow:var(--sh);
     font-size:24px;line-height:48px;text-align:center;z-index:40}
@@ -226,9 +222,16 @@ hr{border:none;border-top:1px solid var(--line-2);margin:12px 0}
   margin-top:14px;box-shadow:var(--sh-sm)}
 .parse-box h4{font-size:13px;font-weight:600;margin-bottom:9px;color:var(--blue-ink)}
 .thumbs{display:flex;gap:9px;flex-wrap:wrap;margin-top:9px}
-.thumb{width:66px;height:66px;border:2px solid var(--ink);border-radius:10px;overflow:hidden;background:#EFEDE7}
-.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb{position:relative;width:66px;height:66px;border:2px solid var(--ink);border-radius:10px;overflow:hidden;background:#EFEDE7}
+.thumb img{width:100%;height:100%;object-fit:cover;cursor:pointer;display:block}
 .thumb.big{width:100%;height:auto}
+/* 缩略图删除角标：放在框内右上角，避免被 overflow:hidden 裁掉 */
+.thumb-x{position:absolute;top:0;right:0;width:24px;height:24px;padding:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--ink);color:#fff;border:none;border-bottom-left-radius:8px;
+  font-size:16px;line-height:1;font-weight:600;cursor:pointer}
+.thumb-x:active{background:var(--red)}
+.thumb-x:hover{background:var(--red)}
 
 .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;
   padding:10px 20px;border-radius:12px;font-size:13px;font-weight:500;z-index:400;max-width:82%;

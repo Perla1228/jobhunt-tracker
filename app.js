@@ -261,10 +261,9 @@ function sidebarHTML(){
       数据仅存本机 · 按 N 快录</div></div>`;
 }
 function tabbarHTML(){
+  // 添加入口统一用右下角悬浮按钮（.fab），底部标签栏不再重复放一个
   const items=[['overview','概览'],['apply','投递'],['interview','面试'],['practice','实践'],['settings','设置']];
-  return `<div class="tabbar">${items.slice(0,2).map(([k,n])=>`<button data-nav="${k}" class="${state.view===k?'active':''}">${n}</button>`).join('')}
-    <button class="tfab" data-act="quick">+</button>
-    ${items.slice(2).map(([k,n])=>`<button data-nav="${k}" class="${state.view===k?'active':''}">${n}</button>`).join('')}</div>`;
+  return `<div class="tabbar">${items.map(([k,n])=>`<button data-nav="${k}" class="${state.view===k?'active':''}">${n}</button>`).join('')}</div>`;
 }
 
 function viewOverview(){
@@ -637,7 +636,11 @@ function detailHTML(){
 function attachHTML(refType, refId){
   const list = state.atts.filter(a=>a.ref_type===refType && a.ref_id===refId);
   return `<h3>附件（${list.length}）</h3>
-    <div class="thumbs">${list.map(a=>`<div class="thumb" data-act="viewatt" data-id="${a.id}"><img src="${a.thumbUrl||''}" alt=""></div>`).join('')}</div>
+    <div class="thumbs">${list.map(a=>`<div class="thumb">
+      <img data-act="viewatt" data-id="${a.id}" src="${a.thumbUrl||''}" alt="">
+      <button class="thumb-x" data-act="delatt" data-id="${a.id}" aria-label="删除这张图片">×</button>
+    </div>`).join('')}</div>
+    ${list.length?'<div class="hint">点图片看大图，点右上角 × 删除</div>':''}
     <button class="btn sm" style="margin-top:8px" data-act="pickimg" data-t="${refType}" data-id="${refId}">+ 上传图片</button>`;
 }
 
@@ -875,7 +878,13 @@ document.addEventListener('click', async e=>{
       if(a){ const url=URL.createObjectURL(a.blob);
         $('#modal-root').innerHTML=`<div class="mask" data-act="closemask"><div class="modal">
           <div class="between" style="margin-bottom:10px"><h2>图片</h2><button class="btn sm" data-act="closemask">关闭</button></div>
-          <div class="thumb big"><img src="${url}" style="width:100%"></div></div></div>`; } break; }
+          <div class="thumb big"><img src="${url}" style="width:100%"></div>
+          <div class="row" style="margin-top:12px;justify-content:flex-end">
+            <button class="btn sm danger" data-act="delatt" data-id="${a.id}">删除这张图片</button></div>
+        </div></div>`; } break; }
+    case 'delatt': { const a=state.atts.find(x=>x.id===el.dataset.id); if(!a) break;
+      if(!confirmBox('确定删除这张图片？删除后无法恢复。')) break;
+      await DB.del('atts', a.id); await loadAll(); render(); toast('图片已删除'); break; }
     case 'closemask': $('#modal-root').innerHTML=state.quick?quickHTML():''; break;
     case 'record': startRecord(); break;
     case 'export': exportData(); break;
@@ -927,8 +936,30 @@ document.addEventListener('keydown', e=>{
     setTimeout(()=>{const n=$('#q-input'); if(n) n.focus();},30); }
   if(e.key==='Escape'){ if(state.quick){ state.quick=null; render(); } else if(state.detail){ state.detail=null; render(); } }
 });
-let resizeTimer=null;
-window.addEventListener('resize', ()=>{ clearTimeout(resizeTimer); resizeTimer=setTimeout(render,200); });
+/* 移动端软键盘弹出会触发 resize。若此时全量重绘，input/textarea 会被销毁重建：
+   焦点丢失（输入法立刻收起）+ 尚未同步到 state 的已输入内容被清空。
+   两道防线：① 有输入焦点时一律不重绘 ② 只有跨越 PC/移动断点才真的需要重排。 */
+let resizeTimer=null, lastWide=null;
+function shouldRerenderOnResize(){
+  const ae = document.activeElement;
+  if(ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName||'')) return false;
+  const wide = window.innerWidth > 900;
+  if(lastWide === null){ lastWide = wide; return false; }
+  if(wide === lastWide) return false;
+  lastWide = wide;
+  return true;
+}
+window.addEventListener('resize', ()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=>{ if(shouldRerenderOnResize()) render(); }, 200);
+});
+
+/* 快录输入框实时同步到 state，这样即便发生重绘内容也不会丢 */
+document.addEventListener('input', e=>{
+  const el = e.target;
+  if(!el || !el.id) return;
+  if(el.id === 'q-input' && state.quick) state.quick.text = el.value;
+});
 
 /* 语音 */
 let recog=null;
